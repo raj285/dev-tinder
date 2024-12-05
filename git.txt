@@ -1,0 +1,7 @@
+write git init in terminal
+use .gitignore
+write paths inside it (gitignore)
+commit -> via UI or git add.-> git commit -n "l-16";
+create new repository on github (codes given by github)
+**y to put plj in guthub**
+
