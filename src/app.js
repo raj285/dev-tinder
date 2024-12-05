@@ -8,25 +8,17 @@ const app=express();
 // server is responding , for all type of request
 // /test is route-> will work for local host:/test
 //**order matters alot  */
-// app.use("/test",(req,res)=>{
-//     res.send("hello from the server");
-//     // **above will work for /test/1,/test/e.....anything /test/+(...);**
-// });
+//  /ab?c -> work for ac and abc b is optional here
+// /ab+c  -> abc, abbc,abbbc.... work
+// /ab*c ->abhdhsc,abdhsuc...work
+// /a(bc)?d bc is optional here
+
 app.get("/test",(req,res)=>{
     res.send({
         firstname:"raj",
         lastname:"Goswami"
     });
 })
-app.post("/test", (req, res) => {
-  res.send("posted succefully");
-});
-app.delete("/test", (req, res) => {
-  res.send("deleted sucesfully");
-});
-app.listen(3000,()=>{
-    console.log('server is succesfully listenng on port 3000')
-});
 // it will wait fr you
 // to stop again and again starting of server(node appp.js)
 //  use nodemon
