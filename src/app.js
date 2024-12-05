@@ -1,28 +1,23 @@
-//  starting point of application
-// creating sever using express js.com
-// first install express js via npm
-//  node modules and package lock json came
-//  
 const express = require('express');
 const app=express(); 
-// server is responding , for all type of request
-// /test is route-> will work for local host:/test
-//**order matters alot  */
-//  /ab?c -> work for ac and abc b is optional here
-// /ab+c  -> abc, abbc,abbbc.... work
-// /ab*c ->abhdhsc,abdhsuc...work
-// /a(bc)?d bc is optional here
 
-app.get("/test",(req,res)=>{
-    res.send({
-        firstname:"raj",
-        lastname:"Goswami"
-    });
+  // res is necessary in qpp. use/get/post..... nhi to you will not get the answer from server
+// app.use("/ddd",res1,res2,[res3,res4],res5);
+  app.use("/user",(req,res,next)=>{
+    console.log("pehla pehla res");
+    // res.send("1st response");
+    next();
+    // above will call nect res if above res is not there 
+    //  if res is there it will not work
+    // but if res come now 
+    res.send("1st late response");
+    // above will give 2nd response late response
+    // next paused late amessage 
+    //  error bcs. after next one more res came; as request already fullfilled
+
+  },
+(req,res)=>{
+    console.log("dusra dusra message");
+    res.send("2nd respond");
 })
-// it will wait fr you
-// to stop again and again starting of server(node appp.js)
-//  use nodemon
-// add something on script to use on terminal
-// "start":"node src/app.js",
-// "dev":"nodemon src/app.js"
-//  use npm run start/dev
+app.listen(7777);
