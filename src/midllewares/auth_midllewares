@@ -1,0 +1,25 @@
+const express = require("express");
+const app = express();
+const admin_auth = app.use("/admin", (req, res, next) => {
+  const token = "xyz";
+  const isautho = token === "xyz";
+  console.log("auth is working ");
+  if (!isautho) {
+    res.status(401).send("not authorized");
+  } else {
+    next();
+  }
+});
+const user_auth = (req, res, next) => {
+  const token = "xyzcdgfghb";
+  const isautho = token === "xyz";
+  console.log("user_auth is working ");
+  if (!isautho) {
+    res.status(401).send("not authorized");
+  } else {
+    next();
+  }
+};
+module.exports = {
+  admin_auth,user_auth
+};
