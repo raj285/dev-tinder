@@ -7,7 +7,7 @@ const User=require("./models/user");
 // read about __v ...what's that?
 app.post("/signup",async (req,res)=>{
   const userObj = {
-    firstName: "Nishant Goswami",
+    firstName: "Deepak",
     lastName: "Goswami",
     emailId: "goswaminishant9670@gmail.com",
     password: "aafat794613",
@@ -16,8 +16,12 @@ app.post("/signup",async (req,res)=>{
   };
   const user=new User(userObj);
   //  below function will return a promise  
-  await  user.save();
-  res.send("user added successfully")
+  try{await  user.save();
+  res.send("user added successfully")}
+  catch(err){
+    res.status(404).send("error not found");
+  }
+  
 })
 connectDB()
   .then(() => {
