@@ -19,7 +19,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("user added successfully");
   } catch (err) {
-    res.status(404).send("error not found");
+    res.status(404).send(err + " fill required  datas properly");
   }
 });
 
@@ -66,16 +66,41 @@ app.delete("/user", async (req, res) => {
 //  no addn. of new fields
 // options rea dit from documentation
 // what u have given only that will change in the document
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  // const userId = req.body.userId;
+  //  to fetch userId from url
+  const userId = req.params?.userId;
   const data = req.body;
+  //  u cant change ur some datas again
+  // like email, gender,.. so put api level validation
+
   try {
-    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    const ALLOWED_UPDATES = [
+      "photourl",
+      "about",
+      "gender",
+      "age",
+      "skills",
+      "userId",
+    ]; 
+    const isUpdateAllowed = Object.keys(data).every((k) => {
+      ALLOWED_UPDATES.includes(k);
+    });
+    if (!isUpdateAllowed) {
+      throw new Error("updation not allowed of certain items");
+    }
+    
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+      // so that validators can run on update also.
+    });
     res.send("user updated succesfully");
   } catch (err) {
-    res.status(400).send("something went wrong");
+    res.status(400).send("Update FAILED" + err.message);
   }
 });
+
 connectDB()
   .then(() => {
     app.listen(7777, () => {
@@ -84,5 +109,5 @@ connectDB()
     console.log("database connected");
   })
   .catch((err) => {
-    console.error("database connected succesfully");
+    console.error(err);
   });
