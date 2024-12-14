@@ -2,27 +2,76 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
-const {validateSignUpData}=require("./utils/validation");
-const bcrypt =require("bcrypt");
+const {
+  validateSignUpData,
+  validateSignInData,
+} = require("./utils/validation");
+const bcrypt = require("bcrypt");
 //  we should take data from API only then update that data to database
 // find jsobject nad json?
 // adding a middleware to read all the json files
 //  if no url given then this method will work on all url.
 app.use(express.json());
 
-// reading data present in body of request
+// reading data present in body of   request
 //  find one will find first/older document (in case of many)documentation -> randomly)
 //  read documentation
 app.post("/signup", async (req, res) => {
-  validateSignUpData(req);
-  const {password} = req.body;
-  
   console.log(req.body);
-  const user = new User(req.body);
+
   // //  below function will return a promise
   try {
+    validateSignUpData(req);
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      gender,
+      age,
+      photoUrl,
+      about,
+      skills,
+    } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      gender,
+      age,
+      photoUrl,
+      about,
+      skills,
+    });
     await user.save();
     res.send("user added successfully");
+  } catch (err) {
+    res.status(404).send(err + " fill required  datas properly");
+  }
+});
+
+//  login api
+app.post("/login", async (req, res) => {
+  try {
+    validateSignInData(req);
+    const { emailId, password } = req.body;
+    console.log(req.body);
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("something went wrong!!!! INVALID CREDENTIALS");
+    }
+    console.log(user)
+    const isValidPassword =await  bcrypt.compare(password, user.password);
+     
+    console.log(isValidPassword);
+    if (isValidPassword) {
+      res.send("logged in succesfully");
+    } else {
+      throw new Error("something went wrong!!!! INVALID CREDENTIALS");
+    }
   } catch (err) {
     res.status(404).send(err + " fill required  datas properly");
   }
@@ -72,7 +121,6 @@ app.delete("/user", async (req, res) => {
 // options rea dit from documentation
 // what u have given only that will change in the document
 
-
 app.patch("/user/:userId", async (req, res) => {
   // const userId = req.body.userId;
   //  to fetch userId from url
@@ -89,7 +137,7 @@ app.patch("/user/:userId", async (req, res) => {
       "age",
       "skills",
       "userId",
-    ]; 
+    ];
     const isUpdateAllowed = Object.keys(data).every((k) => {
       ALLOWED_UPDATES.includes(k);
     });
