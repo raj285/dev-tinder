@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {validateSignUpData}=require("./utils/validation");
+const bcrypt =require("bcrypt");
 //  we should take data from API only then update that data to database
 // find jsobject nad json?
 // adding a middleware to read all the json files
@@ -12,6 +14,9 @@ app.use(express.json());
 //  find one will find first/older document (in case of many)documentation -> randomly)
 //  read documentation
 app.post("/signup", async (req, res) => {
+  validateSignUpData(req);
+  const {password} = req.body;
+  
   console.log(req.body);
   const user = new User(req.body);
   // //  below function will return a promise
@@ -66,6 +71,8 @@ app.delete("/user", async (req, res) => {
 //  no addn. of new fields
 // options rea dit from documentation
 // what u have given only that will change in the document
+
+
 app.patch("/user/:userId", async (req, res) => {
   // const userId = req.body.userId;
   //  to fetch userId from url
@@ -89,7 +96,7 @@ app.patch("/user/:userId", async (req, res) => {
     if (!isUpdateAllowed) {
       throw new Error("updation not allowed of certain items");
     }
-    
+
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: "after",
       runValidators: true,
