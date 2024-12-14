@@ -2,17 +2,19 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const jwt = require("jsonwebtoken");
 const {
   validateSignUpData,
   validateSignInData,
 } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
 //  we should take data from API only then update that data to database
 // find jsobject nad json?
 // adding a middleware to read all the json files
 //  if no url given then this method will work on all url.
 app.use(express.json());
-
+app.use(cookieParser());
 // reading data present in body of   request
 //  find one will find first/older document (in case of many)documentation -> randomly)
 //  read documentation
@@ -58,16 +60,23 @@ app.post("/login", async (req, res) => {
   try {
     validateSignInData(req);
     const { emailId, password } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("something went wrong!!!! INVALID CREDENTIALS");
     }
-    console.log(user)
-    const isValidPassword =await  bcrypt.compare(password, user.password);
-     
-    console.log(isValidPassword);
+    // console.log(user)
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    // console.log(isValidPassword);
     if (isValidPassword) {
+      //  will create JWT Token here
+      //  add the token to cookie
+      //  send the response bak to user
+      // read about res.cookie documentation
+      const token = await jwt.sign({ _id: user._id }, "*MARIJ9-e-9ishq#");
+      console.log(token);
+      res.cookie("token", token);
       res.send("logged in succesfully");
     } else {
       throw new Error("something went wrong!!!! INVALID CREDENTIALS");
@@ -151,6 +160,32 @@ app.patch("/user/:userId", async (req, res) => {
       // so that validators can run on update also.
     });
     res.send("user updated succesfully");
+  } catch (err) {
+    res.status(400).send("Update FAILED" + err.message);
+  }
+});
+
+//  get the profile
+app.get("/profile", async (req, res) => {
+  try {
+    const cookies = req.cookies;
+    // extract the token
+    //  validate the token
+    // see whther token is valid or not
+    //  if yes proceed else...
+    const { token } = cookies;
+    const decodedMessage = await jwt.verify(token, "*MARIJ9-e-9ishq#");
+    //  above will user id and iat(dont know what's that);
+    // console.log(decodedMessage);
+    // console.log("mnjdhb") 
+    const { _id } = decodedMessage;
+    const user = await User.findById(_id);
+    // console.log(user);
+    // console.log(cookies);
+    //  cookie will give undefined
+    // cookie parser is a middleware
+    //  cookie parser to read cookies
+    res.send("aabra ka dabra");
   } catch (err) {
     res.status(400).send("Update FAILED" + err.message);
   }
