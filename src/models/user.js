@@ -79,4 +79,22 @@ const userSchema = new mongoose.Schema(
 // module.exports=UserModel;
 //  or simply write
 
+userSchema.methods.getJWT=async function(){ 
+  const user= this;
+  const token = await JsonWebTokenError.sign(
+    { _id: user._id },
+    "*MARIJ9-e-9ishq#",
+    {expiresIn:"7d",}
+  );
+  return token;
+}
+//  dont use arrow function with this keyword
+
+
+userSchema.methods.validatePassword= async function(passwordInputByUser){
+  const user= this;
+  const passwordHash=user.password;
+  const isValidPassword= await bcrypt.compare(passwordInputByUser,passwordHash);
+  return isValidPassword;
+}
 module.exports = mongoose.model("user", userSchema);

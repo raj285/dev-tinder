@@ -9,6 +9,8 @@ const {
 } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
+const { user_auth } = require("./midllewares/auth");
+
 //  we should take data from API only then update that data to database
 // find jsobject nad json?
 // adding a middleware to read all the json files
@@ -66,7 +68,7 @@ app.post("/login", async (req, res) => {
       throw new Error("something went wrong!!!! INVALID CREDENTIALS");
     }
     // console.log(user)
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await user.validatePassword(password);
 
     // console.log(isValidPassword);
     if (isValidPassword) {
@@ -74,9 +76,16 @@ app.post("/login", async (req, res) => {
       //  add the token to cookie
       //  send the response bak to user
       // read about res.cookie documentation
-      const token = await jwt.sign({ _id: user._id }, "*MARIJ9-e-9ishq#");
+      // const token = await jwt.sign({ _id: user._id }, "*MARIJ9-e-9ishq#", {
+      //   expiresIn: "1d",
+      // });
+      // 1d,1h,
+      const token=await user.getJWT();
       console.log(token);
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
       res.send("logged in succesfully");
     } else {
       throw new Error("something went wrong!!!! INVALID CREDENTIALS");
@@ -166,25 +175,11 @@ app.patch("/user/:userId", async (req, res) => {
 });
 
 //  get the profile
-app.get("/profile", async (req, res) => {
+app.get("/profile", user_auth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-    // extract the token
-    //  validate the token
-    // see whther token is valid or not
-    //  if yes proceed else...
-    const { token } = cookies;
-    const decodedMessage = await jwt.verify(token, "*MARIJ9-e-9ishq#");
-    //  above will user id and iat(dont know what's that);
-    // console.log(decodedMessage);
-    // console.log("mnjdhb") 
-    const { _id } = decodedMessage;
-    const user = await User.findById(_id);
-    // console.log(user);
-    // console.log(cookies);
-    //  cookie will give undefined
-    // cookie parser is a middleware
-    //  cookie parser to read cookies
+    const user = req.user;
+    console.log(`niche ${user.firstName} ka kundali hai`);
+    console.log(user);
     res.send("aabra ka dabra");
   } catch (err) {
     res.status(400).send("Update FAILED" + err.message);
