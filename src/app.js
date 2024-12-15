@@ -180,7 +180,7 @@ app.get("/profile", user_auth, async (req, res) => {
     const user = req.user;
     console.log(`niche ${user.firstName} ka kundali hai`);
     console.log(user);
-    res.send("aabra ka dabra");
+    res.send(user);
   } catch (err) {
     res.status(400).send("Update FAILED" + err.message);
   }

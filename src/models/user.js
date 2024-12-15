@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 // first we will create schema
 const validator =require("validator");
+const jwt  = require("jsonwebtoken");
+const bcrypt =require("bcrypt");
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -81,7 +83,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.getJWT=async function(){ 
   const user= this;
-  const token = await JsonWebTokenError.sign(
+  const token = await jwt.sign(
     { _id: user._id },
     "*MARIJ9-e-9ishq#",
     {expiresIn:"7d",}
